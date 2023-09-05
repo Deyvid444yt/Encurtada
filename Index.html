@@ -87,6 +87,9 @@
             URLs On: <span id="urlOnCount">0</span> | URLs Off: <span id="urlOffCount">0</span>
         </div>
 
+        <!-- Botão de download das URLs válidas (posicionado abaixo do botão de iniciar testes) -->
+        <input type="button" value="Download URLs Válidas" onclick="downloadValidUrls()">
+
         <h2>Resultado:</h2>
         <pre id="result"></pre>
     </div>
@@ -154,6 +157,29 @@
 
             // Role a página para o início
             window.scrollTo(0, 0);
+        }
+
+        function downloadValidUrls() {
+            const validUrls = document.getElementById("result").textContent;
+
+            // Crie um objeto Blob com o conteúdo
+            const blob = new Blob([validUrls], { type: "text/plain" });
+
+            // Crie um URL temporário para o Blob
+            const url = window.URL.createObjectURL(blob);
+
+            // Crie um elemento de link para o download
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = "urls_validas.txt";
+
+            // Adicione o elemento de link ao corpo e clique nele para iniciar o download
+            document.body.appendChild(a);
+            a.click();
+
+            // Libere o URL temporário
+            window.URL.revokeObjectURL(url);
         }
     </script>
 </body>
