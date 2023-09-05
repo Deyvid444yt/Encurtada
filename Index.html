@@ -11,11 +11,6 @@
             background-color: #f7f7f7;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
         }
         .container {
             background-color: #fff;
@@ -25,6 +20,7 @@
             text-align: center;
             max-width: 400px;
             width: 100%;
+            margin: 0 auto; /* Adicione esta linha para centralizar o container */
         }
         h1 {
             margin: 0 0 20px;
@@ -155,6 +151,9 @@
                 await testLink(link, combo);
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Aguarda 1 segundo entre os testes
             }
+
+            // Role a página para o início
+            window.scrollTo(0, 0);
         }
     </script>
 </body>
