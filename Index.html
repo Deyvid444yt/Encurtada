@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Links</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            color: #007BFF;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        input[type="file"], input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="button"] {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="button"]:hover {
+            background-color: #0056b3;
+        }
+        h2 {
+            margin: 20px 0 10px;
+            font-size: 18px;
+        }
+        pre {
+            white-space: pre-wrap;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Links</h1>
+
+        <label for="comboFile">Selecione o arquivo de combo:</label>
+        <input type="file" id="comboFile" accept=".txt"><br>
+
+        <label for="shortURL">Digite a URL encurtada:</label>
+        <input type="text" id="shortURL"><br>
+
+        <label for="maxBots">Digite o número máximo de bots simultâneos (1-100):</label>
+        <input type="number" id="maxBots" min="1" max="100" value="1"><br>
+
+        <input type="button" value="Iniciar Teste" onclick="startLinkTest()">
+
+        <!-- Adicione esta div para mostrar a contagem de URLs -->
+        <div id="urlCount">
+            URLs On: <span id="urlOnCount">0</span> | URLs Off: <span id="urlOffCount">0</span>
+        </div>
+
+        <h2>Resultado:</h2>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        let urlOnCount = 0;
+        let urlOffCount = 0;
+
+        async function testLink(link, combo) {
+            try {
+                const response = await fetch(link, { method: "head", redirect: "follow" });
+                const status = response.status;
+                const contentType = response.headers.get("content-type");
+
+                if (status === 200) {
+                    const finalURL = response.url;
+                    if (contentType && contentType.includes("application")) {
+                        const responseText = await response.text();
+                        if (!responseText.includes("Não foi possível encontrar a página deste cdn.teambr.live") &&
+                            !responseText.includes("HTTP ERROR 404")) {
+                            document.getElementById("result").textContent += "Link válido: " + finalURL + "\n";
+                            urlOnCount++; // Incrementa o contador de URLs "on"
+                            updateUrlCount();
+                        }
+                    }
+                } else {
+                    document.getElementById("result").textContent += "Link retornou status " + status + ": " + link + "\n";
+                    urlOffCount++; // Incrementa o contador de URLs "off"
+                    updateUrlCount();
+                }
+            } catch (error) {
+                document.getElementById("result").textContent += "Erro ao testar link: " + link + "\n";
+                urlOffCount++; // Incrementa o contador de URLs "off"
+                updateUrlCount();
+            }
+        }
+
+        // Função para atualizar a contagem de URLs
+        function updateUrlCount() {
+            document.getElementById("urlOnCount").textContent = urlOnCount;
+            document.getElementById("urlOffCount").textContent = urlOffCount;
+        }
+
+        async function startLinkTest() {
+            const comboFile = document.getElementById("comboFile").files[0];
+            const shortURL = document.getElementById("shortURL").value;
+            const maxBots = document.getElementById("maxBots").value;
+
+            if (!comboFile || !shortURL || !maxBots) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            const combos = await comboFile.text();
+            const comboArray = combos.split("\n").map(combo => combo.trim());
+
+            document.getElementById("result").textContent = "";
+
+            for (let index = 0; index < comboArray.length; index++) {
+                const combo = comboArray[index];
+                const link = `${shortURL}/${combo}`;
+                await testLink(link, combo);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Aguarda 1 segundo entre os testes
+            }
+        }
+    </script>
+</body>
+</html>
